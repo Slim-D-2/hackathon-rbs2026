@@ -1,0 +1,25 @@
+{
+  "name": "Python Dev Environment (uv)",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // Pointer sur le venv créé par uv à la racine du projet
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  },
+
+  // Crée le venv avec uv et installe les dépendances à l'ouverture
+  "postCreateCommand": "uv venv && if [ -f pyproject.toml ]; then uv sync; elif [ -f requirements.txt ]; then uv pip install -r requirements.txt; fi",
+
+  "remoteUser": "vscode"
+}
