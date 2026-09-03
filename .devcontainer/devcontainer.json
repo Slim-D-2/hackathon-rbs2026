@@ -1,25 +1,37 @@
 {
-  "name": "Python Dev Environment (uv)",
+  "name": "Azure Hackathon Dev Environment",
   "build": {
     "dockerfile": "Dockerfile"
   },
-  
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+      "version": "latest"
+    }
+  },
+  "mounts": [
+    // Fast virtual environment I/O inside Docker volume
+    "source=python-venv-${devcontainerId},target=${containerWorkspaceFolder}/.venv,type=volume",
+    // Persist Azure login credentials across rebuilds
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.azure,target=/home/vscode/.azure,type=bind"
+  ],
   "customizations": {
     "vscode": {
       "settings": {
-        // Pointer sur le venv créé par uv à la racine du projet
         "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
+        "terminal.integrated.defaultProfile.linux": "bash"
       },
       "extensions": [
         "ms-python.python",
-        "ms-python.vscode-pylance"
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "ms-vscode.azurecli",
+        "ms-azuretools.vscode-docker",
+        "humao.rest-client"
       ]
     }
   },
-
-  // Crée le venv avec uv et installe les dépendances à l'ouverture
-  "postCreateCommand": "uv venv && if [ -f pyproject.toml ]; then uv sync; elif [ -f requirements.txt ]; then uv pip install -r requirements.txt; fi",
-
-  "remoteUser": "vscode"
+  "updateContentCommand": "sudo chown -R vscode:vscode ${containerWorkspaceFolder}",
+  "postCreateCommand": "uv venv --allow-existing && if [ -f pyproject.toml ]; then uv sync --no-install-project; elif [ -f requirements.txt ]; then uv pip install -r requirements.txt; fi"
 }
