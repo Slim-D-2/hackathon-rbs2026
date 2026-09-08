@@ -11,7 +11,7 @@ Write-Host "Activation du composant WSL..." -ForegroundColor Yellow
 wsl --install --no-distribution
 
 # Install Git, Docker Desktop, and VS Code
-$packages = @("Git.Git", "Docker.DockerDesktop", "Microsoft.VisualStudioCode")
+$packages = @("Git.Git", "Docker.DockerDesktop", "Microsoft.VisualStudioCode", "GnuWin32.Make", "Microsoft.AzureCLI")
 
 foreach ($package in $packages) {
     Write-Host "Installing $package..." -ForegroundColor Yellow
