@@ -94,8 +94,8 @@ hackathon/
 
 The Bicep deployment in [`infra/`](./infra/) provisions a Microsoft Foundry
 resource (`Microsoft.CognitiveServices/accounts` with `kind: 'AIServices'`),
-its Foundry project, and an LLM deployment. The deployment name is the value
-applications send as the `model` or deployment identifier.
+its Foundry project, and one or more LLM deployments. Each deployment name is
+the value applications send as the `model` or deployment identifier.
 
 ### Deploying
 
@@ -107,8 +107,28 @@ applications send as the `model` or deployment identifier.
    ```
 
 2. Update [`infra/main.bicepparam`](./infra/main.bicepparam). Select a region,
-   model, and model version that are available to your Azure subscription. The
-   Foundry resource name must be globally unique.
+   Foundry resource name, and one or more `modelDeployments` entries with model
+   names and versions available to your Azure subscription. The Foundry resource
+   name must be globally unique.
+
+   ```bicep
+   param modelDeployments = [
+     {
+       deploymentName: 'chat'
+       modelName: 'gpt-4o-mini'
+       modelVersion: '2026-03-17'
+       skuName: 'GlobalStandard'
+       capacity: 1
+     }
+     {
+       deploymentName: 'reasoning'
+       modelName: 'gpt-5.6-terra'
+       modelVersion: '2026-07-09'
+       skuName: 'GlobalStandard'
+       capacity: 1
+     }
+   ]
+   ```
 
 3. Validate and deploy the subscription-scoped template (creates the resource
    group and all resources in it):
@@ -141,7 +161,7 @@ applications send as the `model` or deployment identifier.
      --query properties.outputs.foundryEndpoint.value --output tsv
    az deployment sub show \
      --name foundry-llm \
-     --query properties.outputs.llmDeploymentName.value --output tsv
+       --query properties.outputs.llmDeploymentNames.value --output tsv
    az cognitiveservices account keys list \
      --name "<foundry-name>" \
      --resource-group "<resource-group-name>" \
@@ -149,8 +169,8 @@ applications send as the `model` or deployment identifier.
    ```
 
    Put the resulting values in `.env` as `AZURE_OPENAI_ENDPOINT`,
-   `AZURE_OPENAI_API_KEY`, and `AZURE_OPENAI_DEPLOYMENT_NAME`. Do not commit
-   the key.
+   `AZURE_OPENAI_API_KEY`, and the deployment name your app should use as
+   `AZURE_OPENAI_DEPLOYMENT_NAME`. Do not commit the key.
 
 To remove the deployed resources when they are no longer needed, run
 `make destroy` (or `az group delete --name "<resource-group-name>" --yes`).

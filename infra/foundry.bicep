@@ -19,21 +19,9 @@ param foundryProjectDisplayName string = foundryProjectName
 @description('Description displayed for the Microsoft Foundry project.')
 param foundryProjectDescription string = 'Hackathon Microsoft Foundry project.'
 
-@description('Name exposed to applications for the LLM deployment.')
-param deploymentName string
-
-@description('Model name available in the selected Azure region.')
-param modelName string
-
-@description('Model version available in the selected Azure region.')
-param modelVersion string
-
-@description('Deployment SKU for the selected model.')
-param deploymentSkuName string
-
-@description('Model deployment capacity in thousands of tokens per minute.')
-@minValue(1)
-param deploymentCapacity int
+@description('Model deployments to create. Each deploymentName is the value applications use as the model/deployment identifier.')
+@minLength(1)
+param modelDeployments array
 
 @description('Whether the Foundry endpoint accepts public network traffic.')
 param publicNetworkAccess string
@@ -75,25 +63,26 @@ resource foundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-06-0
 }
 
 // Serialized after the project: the account rejects concurrent write operations.
-resource llmDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = {
+resource llmDeployments 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = [for deployment in modelDeployments: {
   parent: foundry
-  name: deploymentName
+  name: deployment.deploymentName
   sku: {
-    name: deploymentSkuName
-    capacity: deploymentCapacity
+    name: deployment.skuName
+    capacity: deployment.capacity
   }
   properties: {
     model: {
       format: 'OpenAI'
-      name: modelName
-      version: modelVersion
+      name: deployment.modelName
+      version: deployment.modelVersion
     }
   }
   dependsOn: [
     foundryProject
   ]
-}
+}]
 
 output foundryEndpoint string = foundry.properties.endpoint
 output foundryProjectName string = foundryProject.name
-output llmDeploymentName string = llmDeployment.name
+output llmDeploymentName string = llmDeployments[0].name
+output llmDeploymentNames array = [for (deployment, index) in modelDeployments: llmDeployments[index].name]

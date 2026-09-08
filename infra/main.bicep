@@ -22,21 +22,17 @@ param foundryProjectDisplayName string = foundryProjectName
 @description('Description displayed for the Microsoft Foundry project.')
 param foundryProjectDescription string = 'Hackathon Microsoft Foundry project.'
 
-@description('Name exposed to applications for the LLM deployment.')
-param deploymentName string = 'chat'
-
-@description('Model name available in the selected Azure region.')
-param modelName string = 'gpt-4o-mini'
-
-@description('Model version available in the selected Azure region.')
-param modelVersion string = '2026-03-17'
-
-@description('Deployment SKU for the selected model.')
-param deploymentSkuName string = 'GlobalStandard'
-
-@description('Model deployment capacity in thousands of tokens per minute.')
-@minValue(1)
-param deploymentCapacity int = 1
+@description('Model deployments to create. Each deploymentName is the value applications use as the model/deployment identifier.')
+@minLength(1)
+param modelDeployments array = [
+  {
+    deploymentName: 'chat'
+    modelName: 'gpt-4o-mini'
+    modelVersion: '2026-03-17'
+    skuName: 'GlobalStandard'
+    capacity: 1
+  }
+]
 
 @description('Whether the Foundry endpoint accepts public network traffic.')
 param publicNetworkAccess string = 'Enabled'
@@ -51,7 +47,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 }
 
 module foundry './foundry.bicep' = {
-  name: 'foundry-${deploymentName}'
+  name: 'foundry-${modelDeployments[0].deploymentName}'
   scope: az.resourceGroup(resourceGroupName)
   params: {
     location: location
@@ -59,11 +55,7 @@ module foundry './foundry.bicep' = {
     foundryProjectName: foundryProjectName
     foundryProjectDisplayName: foundryProjectDisplayName
     foundryProjectDescription: foundryProjectDescription
-    deploymentName: deploymentName
-    modelName: modelName
-    modelVersion: modelVersion
-    deploymentSkuName: deploymentSkuName
-    deploymentCapacity: deploymentCapacity
+    modelDeployments: modelDeployments
     publicNetworkAccess: publicNetworkAccess
     tags: tags
   }
@@ -75,4 +67,5 @@ module foundry './foundry.bicep' = {
 output foundryEndpoint string = foundry.outputs.foundryEndpoint
 output foundryProjectName string = foundry.outputs.foundryProjectName
 output llmDeploymentName string = foundry.outputs.llmDeploymentName
+output llmDeploymentNames array = foundry.outputs.llmDeploymentNames
 output deployedResourceGroupName string = resourceGroup.name

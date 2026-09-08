@@ -20,7 +20,7 @@ help: ## Show available targets
 
 .PHONY: login
 login: ## Sign in to Azure (interactive)
-	az login
+	az login --use-device-code
 
 .PHONY: build
 build: ## Validate/compile the Bicep template
@@ -43,13 +43,13 @@ deploy: build ## Deploy the resource group and all Foundry resources in it
 		--parameters $(PARAMETERS_FILE)
 
 .PHONY: outputs
-outputs: ## Show the endpoint, project, deployment name and resource group from the last deploy
+outputs: ## Show the endpoint, project, deployment names and resource group from the last deploy
 	@echo "Foundry endpoint:"
 	@az deployment sub show --name $(DEPLOYMENT_NAME) --query properties.outputs.foundryEndpoint.value --output tsv
 	@echo "Foundry project name:"
 	@az deployment sub show --name $(DEPLOYMENT_NAME) --query properties.outputs.foundryProjectName.value --output tsv
-	@echo "LLM deployment name:"
-	@az deployment sub show --name $(DEPLOYMENT_NAME) --query properties.outputs.llmDeploymentName.value --output tsv
+	@echo "LLM deployment names:"
+	@az deployment sub show --name $(DEPLOYMENT_NAME) --query properties.outputs.llmDeploymentNames.value --output tsv
 	@echo "Resource group name:"
 	@az deployment sub show --name $(DEPLOYMENT_NAME) --query properties.outputs.deployedResourceGroupName.value --output tsv
 
