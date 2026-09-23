@@ -10,6 +10,8 @@ décrit des formats, pas des données métier réelles.
   enregistrements/champs (positions, niveaux, pictures, descriptions), staging
   `raw_record_payload` et projection prudente `dossier`.
 - `02_demo_seed.sql` : une charge de démonstration manifestement fictive.
+- `03_realistic_synthetic_seed.sql` : 12 dossiers de prêt synthétiques,
+  crédibles pour une démonstration, ainsi que quelques payloads raw associés.
 
 ## Exécution sur Azure PostgreSQL
 
@@ -29,3 +31,7 @@ psql "host=<serveur>.postgres.database.azure.com port=5432 dbname=<base> user=<u
 Le catalogue conserve les champs non modélisés dans
 `creditme.raw_record_payload`; seules les colonnes de `creditme.dossier`
 directement identifiables sont projetées.
+
+Les données du fichier `03_realistic_synthetic_seed.sql` sont entièrement
+fictives. Elles ressemblent à des dossiers de crédit réalistes, mais ne
+représentent aucun client ni compte réel.
